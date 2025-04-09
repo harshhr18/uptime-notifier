@@ -7,7 +7,8 @@ app = Flask(__name__)
 # List of websites to monitor
 sites = [
     "https://google.com",
-    "https://example.com"
+    "https://www.youtube.com/",
+
 ]
 
 @app.route('/')
