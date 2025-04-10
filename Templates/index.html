@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Uptime Notifier</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>🔔 Uptime Notifier</h1>
+    <p>Monitor the uptime of websites.</p>
+
+    <ul class="site-list" id="status-list">
+        {% for site in sites %}
+        <li data-site="{{ site }}">
+            <img class="favicon" src="https://www.google.com/s2/favicons?sz=64&domain={{ site }}" />
+            <span class="url">{{ site }}</span>
+            <button class="check-site" data-site="{{ site }}">Check</button>
+            <span class="status">⏳ Not checked</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- JavaScript for individual check buttons -->
+<script>
+    document.querySelectorAll(".check-site").forEach(button => {
+        button.addEventListener("click", async () => {
+            const site = button.dataset.site;
+            const li = document.querySelector(`li[data-site='${site}']`);
+            const statusSpan = li.querySelector(".status");
+
+            statusSpan.textContent = "⏳ Checking...";
+            statusSpan.className = "status loading";
+
+            try {
+                const response = await fetch(`/api/check_single?site=${encodeURIComponent(site)}`);
+                const data = await response.json();
+
+                if (data.status === "UP") {
+                    statusSpan.textContent = `✅ UP (${data.response_time})`;
+                    statusSpan.className = "status up";
+                } else {
+                    statusSpan.textContent = `❌ DOWN`;
+                    statusSpan.className = "status down";
+                }
+
+                // ✅ Change button text to "Check Again"
+                button.textContent = "Check Again";
+
+            } catch (err) {
+                statusSpan.textContent = "⚠ Error";
+                statusSpan.className = "status down";
+                button.textContent = "Check Again"; // Also change on error
+            }
+        });
+    });
+</script>
+</body>
+</html>
